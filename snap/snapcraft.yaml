@@ -1,0 +1,55 @@
+name: festival-community
+base: core22
+version: '1.0.1'
+summary: Music player
+description: |
+  Festival is a music player for local album collections.
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+compression: lzo
+
+environment:
+  DISABLE_WAYLAND: 1
+
+parts:
+  festival:
+    plugin: dump
+    source: .
+    build-packages:
+      - wget
+    override-build: |
+      craftctl default
+      wget https://github.com/hinto-janai/festival/releases/download/v1.0.1/Festival-v1.0.1-x86_64.AppImage
+      mv Festival-v1.0.1-x86_64.AppImage $CRAFT_PART_INSTALL
+    override-prime: |
+      craftctl default
+      chmod +x $CRAFT_PRIME/Festival-v1.0.1-x86_64.AppImage
+      $CRAFT_PRIME/Festival-v1.0.1-x86_64.AppImage --appimage-extract
+      chmod 777 -R $CRAFT_PRIME/squashfs-root
+      chmod +x $CRAFT_PRIME/squashfs-root/AppRun
+      mkdir -p $CRAFT_PRIME/meta/gui
+      cp $CRAFT_PRIME/squashfs-root/festival.png $CRAFT_PRIME/meta/gui/icon.png
+      sed -i 's|Icon=festival|Icon=${SNAP}/meta/gui/icon.png|g' $CRAFT_PRIME/squashfs-root/festival.desktop
+    
+apps:
+  festival-community:
+    command: squashfs-root/AppRun
+    desktop: squashfs-root/festival.desktop
+    extensions: [gnome]
+    plugs:
+      - desktop
+      - desktop-legacy
+      - x11
+      - wayland
+      - audio-playback
+    slots: 
+      - mpris
+slots:
+  dbus-festival:
+    interface: dbus
+    bus: session
+    name: org.mpris.MediaPlayer2.pm.festival.Festival
