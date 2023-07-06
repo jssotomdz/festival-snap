@@ -49,7 +49,9 @@ apps:
     slots: 
       - mpris
 slots:
-  dbus-festival:
-    interface: dbus
-    bus: session
-    name: org.mpris.MediaPlayer2.pm.festival.Festival
+  #dbus-festival:
+  #  interface: dbus
+  #  bus: session
+  #  name: org.mpris.MediaPlayer2.pm.festival.Festival
+  mpris:
+    name: Festival
